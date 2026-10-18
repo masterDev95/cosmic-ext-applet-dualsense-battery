@@ -1,8 +1,8 @@
 use cosmic::{
     Element,
     app::{Core, Task},
-    iced::{Alignment, Subscription},
-    widget::{icon, row, text},
+    iced::{Alignment, Length, Size, Subscription, window},
+    widget::{container, icon, row, text},
 };
 
 use crate::battery;
@@ -12,6 +12,7 @@ const APP_ID: &str = "io.github.axolotl.CosmicDualsenseBattery";
 pub struct AppState {
     core: Core,
     status: BatteryStatus,
+    content_size_requested: bool,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -47,6 +48,7 @@ impl cosmic::Application for AppState {
             Self {
                 core,
                 status: BatteryStatus::Checking,
+                content_size_requested: false,
             },
             Task::none(),
         )
@@ -54,7 +56,21 @@ impl cosmic::Application for AppState {
 
     fn update(&mut self, message: Self::Message) -> Task<Self::Message> {
         match message {
-            AppMsg::BatteryUpdated(status) => self.status = status,
+            AppMsg::BatteryUpdated(status) => {
+                self.status = status;
+                if !self.content_size_requested {
+                    self.content_size_requested = true;
+                    let (width, height) = self.core.applet.suggested_window_size();
+                    let size = if self.core.applet.is_horizontal() {
+                        Size::new(54.0, height.get() as f32)
+                    } else {
+                        Size::new(width.get() as f32, height.get() as f32)
+                    };
+                    if let Some(id) = self.core.main_window_id() {
+                        return window::resize(id, size);
+                    }
+                }
+            }
         }
         Task::none()
     }
@@ -73,12 +89,15 @@ impl cosmic::Application for AppState {
             BatteryStatus::Unavailable => "battery-caution-symbolic",
         };
         let icon_size = self.core.applet.suggested_size(true).0;
-        row::with_capacity(2)
-            .spacing(4)
-            .align_y(Alignment::Center)
-            .push(icon::from_name(icon_name).symbolic(true).size(icon_size))
-            .push(text(label))
-            .into()
+        container(
+            row::with_capacity(2)
+                .spacing(4)
+                .align_y(Alignment::Center)
+                .push(icon::from_name(icon_name).symbolic(true).size(icon_size))
+                .push(text(label)),
+        )
+        .center_y(Length::Fill)
+        .into()
     }
 
     fn subscription(&self) -> Subscription<Self::Message> {
