@@ -1,0 +1,15 @@
+[Desktop Entry]
+Name=DualSense Battery
+Name[fr]=Batterie de la DualSense
+Comment=Show the connected DualSense controller battery level
+Comment[fr]=Afficher le niveau de batterie de la manette DualSense connectée
+Type=Application
+Exec=cosmic-ext-applet-dualsense-battery
+Terminal=false
+Categories=Cosmic;Utility;
+Keywords=Cosmic;Gamepad;DualSense;Battery;
+Icon=input-gaming-symbolic
+StartupNotify=false
+NoDisplay=true
+X-CosmicApplet=true
+X-CosmicHoverPopup=Auto

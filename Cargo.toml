@@ -1,0 +1,15 @@
+[package]
+name = "cosmic-ext-applet-dualsense-battery"
+version = "0.1.0"
+edition = "2024"
+description = "COSMIC panel applet for DualSense battery status"
+
+[dependencies]
+tokio = { version = "1", features = ["time"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt"] }
+
+[dependencies.libcosmic]
+git = "https://github.com/pop-os/libcosmic.git"
+default-features = false
+features = ["applet", "tokio", "wayland"]
