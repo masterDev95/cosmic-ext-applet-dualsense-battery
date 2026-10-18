@@ -66,20 +66,52 @@ impl cosmic::Application for AppState {
             BatteryStatus::Disconnected => "Déconnectée".to_owned(),
             BatteryStatus::Unavailable => "Indisponible".to_owned(),
         };
+        let icon_name = match self.status {
+            BatteryStatus::Checking => "battery-symbolic",
+            BatteryStatus::Connected(percentage) => battery_icon(percentage),
+            BatteryStatus::Disconnected => "battery-missing-symbolic",
+            BatteryStatus::Unavailable => "battery-caution-symbolic",
+        };
         let icon_size = self.core.applet.suggested_size(true).0;
         row::with_capacity(2)
             .spacing(4)
             .align_y(Alignment::Center)
-            .push(
-                icon::from_name("battery-symbolic")
-                    .symbolic(true)
-                    .size(icon_size),
-            )
+            .push(icon::from_name(icon_name).symbolic(true).size(icon_size))
             .push(text(label))
             .into()
     }
 
     fn subscription(&self) -> Subscription<Self::Message> {
         Subscription::run(battery::subscription)
+    }
+}
+
+fn battery_icon(percentage: u8) -> &'static str {
+    match percentage {
+        0..=5 => "cosmic-applet-battery-level-0-symbolic",
+        6..=10 => "cosmic-applet-battery-level-5-symbolic",
+        11..=20 => "cosmic-applet-battery-level-10-symbolic",
+        21..=35 => "cosmic-applet-battery-level-20-symbolic",
+        36..=50 => "cosmic-applet-battery-level-35-symbolic",
+        51..=65 => "cosmic-applet-battery-level-50-symbolic",
+        66..=80 => "cosmic-applet-battery-level-65-symbolic",
+        81..=90 => "cosmic-applet-battery-level-80-symbolic",
+        91..=99 => "cosmic-applet-battery-level-90-symbolic",
+        _ => "cosmic-applet-battery-level-100-symbolic",
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::battery_icon;
+
+    #[test]
+    fn selects_icon_for_battery_percentage() {
+        assert_eq!(battery_icon(0), "cosmic-applet-battery-level-0-symbolic");
+        assert_eq!(battery_icon(50), "cosmic-applet-battery-level-35-symbolic");
+        assert_eq!(
+            battery_icon(100),
+            "cosmic-applet-battery-level-100-symbolic"
+        );
     }
 }
