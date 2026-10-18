@@ -1,4 +1,5 @@
 mod app;
+mod battery;
 
 fn main() -> cosmic::iced::Result {
     tracing_subscriber::fmt()
